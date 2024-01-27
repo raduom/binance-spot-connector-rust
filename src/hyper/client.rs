@@ -79,11 +79,14 @@ where
         let mut hyper_request = hyper::Request::builder().method(method);
         let user_agent = &format!("binance-spot-connector-rust/{}", VERSION);
         hyper_request = hyper_request.header("User-Agent", user_agent);
+        println!("building request 1: {:?}", hyper_request);
         let client_credentials = self.credentials.as_ref();
         let request_credentials = credentials.as_ref();
         if let Some(Credentials { api_key, signature }) = request_credentials.or(client_credentials)
         {
             hyper_request = hyper_request.header("X-MBX-APIKEY", api_key);
+            println!("building request api key 1.5: {:?}", api_key);
+            println!("building request 2: {:?}", hyper_request);
             if sign {
                 let mut timestamp = SystemTime::now()
                     .duration_since(UNIX_EPOCH)
@@ -112,9 +115,17 @@ where
         let uri: Uri = url_parts.join("").parse()?;
         log::debug!("{}", uri);
         let hyper_request = hyper_request.uri(uri);
+        println!("building request 3: {:?}", hyper_request);
+
+        println!("request has been built 1");
+        println!("request headers: {:?}", hyper_request.headers_ref());
+        println!("building request: {:?}", hyper_request);
+        println!("request has been built 2");
         let request = hyper_request
             .body(Body::empty())
             .map_err(|err| Error::Parse(err))?;
+        println!("request has been built");
+
         let response = self
             .client
             .request(request)
